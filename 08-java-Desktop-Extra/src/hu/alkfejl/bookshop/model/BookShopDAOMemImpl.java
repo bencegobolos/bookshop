@@ -1,6 +1,7 @@
 package hu.alkfejl.bookshop.model;
 
 import hu.alkfejl.bookshop.model.bean.Book;
+import hu.alkfejl.bookshop.model.bean.Cd;
 import hu.alkfejl.bookshop.model.bean.Customer;
 import hu.alkfejl.bookshop.model.bean.Purchase;
 
@@ -19,6 +20,7 @@ public class BookShopDAOMemImpl implements BookShopDAO {
     List<Customer> customers = new ArrayList<Customer>();
     List<Book> books = new ArrayList<Book>();
     List<Purchase> purchases = new ArrayList<Purchase>();
+    List<Cd> cds = new ArrayList<Cd>();
 
     /**
      * Hozzáad egy {@link Customer}-t az adattárhoz.
@@ -150,6 +152,62 @@ public class BookShopDAOMemImpl implements BookShopDAO {
 
     public List<Purchase> getPurchases() {
         return purchases;
+    }
+    
+    /**
+     * Hozzáad egy {@link Book}-ot az adattárhoz.
+     *
+     * @param book A tárolandó {@link Book}.
+     * @return Igaz, ha sikeresen tárolva, hamis, egyébként.
+     */
+    public boolean addCd(Cd cd) {
+    	if (cd.getTitle() == null)
+    		return false;
+    	if (cd.getAuthor() == null)
+    		return false;
+    	if (!checkCdUnique(cd)) {
+    		return false;
+    	}
+    	
+        // léptetjük az id-t az új book-hoz (ezt az adattár kell biztosítja)
+        id++;
+
+        // az adattároló id-t oszt az objektumnak
+        cd.setId(id);
+
+        boolean isStored = cds.add(cd);
+
+        return isStored;
+    }
+    
+    /**
+     * Visszaadja a tárolt {@link Cd} példányokat.
+     *
+     * @return A tárolt {@link Cd}-k listája.
+     */
+    public List<Cd> getCds() {
+        return cds;
+    }
+    
+    /**
+     * Ellenõrzi a {@link #customers} integritását, a {@link Customer#getName()}
+     * egyedi kell legyen.
+     *
+     * @param newCustomer Az újonnan felveendõ {@link Customer}.
+     * @return True, ha a név egyedi, false egyébként.
+     */
+    private boolean checkCdUnique(Cd newCd) {
+        boolean rvIsValid = true;
+
+        for (Cd cd : cds) {
+            if (cd.getTitle().equals(newCd.getTitle()) &&
+            	cd.getAuthor().equals(newCd.getAuthor())) {
+                rvIsValid = false;
+                break;
+            }
+        }
+
+        return rvIsValid;
     }
 
 }

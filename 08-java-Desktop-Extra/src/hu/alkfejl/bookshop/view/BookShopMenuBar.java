@@ -1,9 +1,12 @@
 package hu.alkfejl.bookshop.view;
 
+import hu.alkfejl.bookshop.model.bean.Cd;
 import hu.alkfejl.bookshop.model.bean.Purchase;
 import hu.alkfejl.bookshop.view.dialogs.AddCustomerDialog;
 import hu.alkfejl.bookshop.view.dialogs.BuyBookDialog;
+import hu.alkfejl.bookshop.view.dialogs.BuyCdDialog;
 import hu.alkfejl.bookshop.view.dialogs.SellBookDialog;
+import hu.alkfejl.bookshop.view.tablemodels.CdTableModel;
 import hu.alkfejl.bookshop.view.tablemodels.PurchaseTableModel;
 import hu.alkfejl.bookshop.view.workers.ListBooksThreadWorker;
 import hu.alkfejl.bookshop.view.workers.ListCustomersSwingWorker;
@@ -41,6 +44,7 @@ public class BookShopMenuBar extends JMenuBar implements ActionListener {
         createMenuPoint(Labels.customer, Labels.add_customer, Labels.list_customers);
         createMenuPoint(Labels.book, Labels.buy_book, Labels.list_books);
         createMenuPoint(Labels.sell, Labels.sell_book, Labels.list_sold_books);
+        createMenuPoint(Labels.cd, Labels.buy_cd, Labels.list_cds);
     }
 
     private void createMenuPoint(String name, String... subnames) {
@@ -100,7 +104,13 @@ public class BookShopMenuBar extends JMenuBar implements ActionListener {
             JTable table = new JTable(new PurchaseTableModel(purchases));
             JScrollPane container = new JScrollPane(table);
             bookShopGUI.setActualContent(container);
+        } else if (actionCommand.equals(Labels.buy_cd)) {
+        	new BuyCdDialog(bookShopGUI, true);
+        } else if (actionCommand.equals(Labels.list_cds)) {
+        	List<Cd> cds = bookShopGUI.getController().getCds();
+            JTable table = new JTable(new CdTableModel(cds));
+            JScrollPane container = new JScrollPane(table);
+            bookShopGUI.setActualContent(container);
         }
     }
-
 }

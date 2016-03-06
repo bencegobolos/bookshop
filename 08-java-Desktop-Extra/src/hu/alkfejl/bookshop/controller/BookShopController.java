@@ -2,7 +2,9 @@ package hu.alkfejl.bookshop.controller;
 
 import hu.alkfejl.bookshop.model.BookShopDAO;
 import hu.alkfejl.bookshop.model.BookShopDAODBImpl;
+import hu.alkfejl.bookshop.model.BookShopDAOMemImpl;
 import hu.alkfejl.bookshop.model.bean.Book;
+import hu.alkfejl.bookshop.model.bean.Cd;
 import hu.alkfejl.bookshop.model.bean.Customer;
 import hu.alkfejl.bookshop.model.bean.Purchase;
 import hu.alkfejl.bookshop.view.BookShopGUI;
@@ -69,6 +71,18 @@ public class BookShopController {
 
     public List<Purchase> getPurchases(){
         return dao.getPurchases();
+    }
+    
+    public boolean addCd(Cd cd) {
+        if (cd.getYear() < 2016 && cd.getYear() > 1979) {
+            cd.setHit(true);
+        }
+
+        return dao.addCd(cd);
+    }
+    
+    public List<Cd> getCds(){
+    	return dao.getCds();
     }
 
 }

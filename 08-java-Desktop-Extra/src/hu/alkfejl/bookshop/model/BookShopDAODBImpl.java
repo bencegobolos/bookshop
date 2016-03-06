@@ -1,6 +1,7 @@
 package hu.alkfejl.bookshop.model;
 
 import hu.alkfejl.bookshop.model.bean.Book;
+import hu.alkfejl.bookshop.model.bean.Cd;
 import hu.alkfejl.bookshop.model.bean.Customer;
 import hu.alkfejl.bookshop.model.bean.Purchase;
 
@@ -22,6 +23,7 @@ public class BookShopDAODBImpl implements BookShopDAO {
     List<Customer> customers = new ArrayList<Customer>();
     List<Book> books = new ArrayList<Book>();
     List<Purchase> purchases = new ArrayList<Purchase>();
+    List<Cd> cds = new ArrayList<Cd>();
 
     // Adatbázis fájlt reprezentáló string, melyet a
     // BookShopDB környezeti változóból olvasunk ki (env.bat állítja be)
@@ -41,6 +43,15 @@ public class BookShopDAODBImpl implements BookShopDAO {
 
     // SQL lekérdezés mely lekérdez egy meghatározott id-jû könyvet
     private static final String SQL_SELECT_ONE_BOOK = "SELECT * FROM Book WHERE id=?";
+    
+    // SQL lekérdezés CD-k listázására.
+    private static final String SQL_SELECT_ALL_CDS = "SELECT * FROM Cd";
+    
+    // SQL INSERT új CD beviteléhez az adatbázisa.
+    private static final String SQL_INSERT_CD =
+        "INSERT INTO Cd " +
+        "(author, title, price, year, hit, selection) " +
+        "VALUES(?, ?, ?, ?, ?, ?)";
 
     // SQL paraméterezhetõ INSERT utasítás vásárló felvételére
     // Az egyes paramétereket utólagosan állíthatjuk be (PreparedStatement)
@@ -609,6 +620,171 @@ public class BookShopDAODBImpl implements BookShopDAO {
         }
 
         return rvCustomersList;
+    }
+
+	@Override
+	/**
+     * Hozzáad egy {@link CD}-t az adattárhoz.
+     *
+     * @param cd A tárolandó {@link Cd}.
+     * @return Igaz, ha sikeresen tárolva, hamis, egyébként.
+     */
+    public boolean addCd(Cd cd) {
+        boolean rvSucceeded = false;
+
+        // Adatbázis kapcsolatot reprezentáló objektum
+        Connection conn = null;
+        PreparedStatement pst = null;
+
+        try {
+            // Az adatbázis kapcsolatunkat a DriverManager segítségével hozzuk létre
+            // Megadjuk hogy a JDBC milyen driveren keresztül milyen fájlt keressen
+            conn = DriverManager.getConnection("jdbc:sqlite:" + DATABASE_FILE);
+
+            // Új vásárló felvétele esetén egy PreparedStatement objektumot
+            // kérünk a kapcsolat objektumtól
+            // Ez egy paraméterezhetõ SQL utasitást vár, a paraméterek ?-ként
+            // jelennek meg
+            pst = conn.prepareStatement(SQL_INSERT_CD);
+
+            // Az egyes parametéreket sorban kell megadni, pozíció alapján, ami
+            // 1-tõl indul
+            // Célszerû egy indexet inkrementálni, mivel ha az egyik paraméter
+            // kiesik, akkor nem kell az utána következõeket újra számozni...
+            int index = 1;
+            pst.setString(index++, cd.getAuthor());
+            pst.setString(index++, cd.getTitle());
+            pst.setInt(index++, cd.getPrice());
+            pst.setInt(index++, cd.getYear());
+            pst.setBoolean(index++, cd.isHit());
+            pst.setBoolean(index++, cd.isSelection());
+
+            // Az ExecuteUpdate paranccsal végrehajtjuk az utasítást
+            // Az executeUpdate visszaadja, hogy hány sort érintett az SQL ha 
+            // DML-t hajtunk végre (DDL esetén 0-t ad vissza)
+            int rowsAffected = pst.executeUpdate();
+
+            // csak akkor sikeres, ha valóban volt érintett sor
+            if (rowsAffected == 1) {
+                rvSucceeded = true;
+            }
+        } catch (SQLException e) {
+            System.out.println("Failed to execute adding cd.");
+            e.printStackTrace();
+        } finally {
+            // NAGYON FONTOS!
+            // Minden adatbázis objektumot le kell zárni, mivel ha ezt nem
+            // tesszük meg, akkor elõfordulhat, hogy nyitott kapcsolatok
+            // maradnak az adatbázis felé. Az adatbázis pedig korlátozott
+            // számban tart fenn kapcsolatokat, ezért egy idõ után akar ez be is
+            // telhet!
+            // Minden egyes objektumot külön try-catch ágban kell megpróbálni
+            // bezárni!
+            try {
+                if (pst != null) {
+                    pst.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Failed to close statement when adding cd.");
+                e.printStackTrace();
+            }
+
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Failed to close connection when adding cd.");
+                e.printStackTrace();
+            }
+        }
+
+        return rvSucceeded;
+    }
+
+	/**
+     * Visszaadja a tárolt {@link Customer} példányokat.
+     *
+     * @return A tárolt {@link Customer}-ek listája.
+     */
+    public List<Cd> getCds(){
+        Connection conn = null;
+        Statement st = null;
+
+        // Töröljük a memóriából a vásárlókat (azért tartjuk bennt, mert
+        // lehetnek késõbb olyan mûveletek, melyekhez nem kell frissíteni)
+        cds.clear();
+
+        try {
+            // Az adatbázis kapcsolatunkat a DriverManager segítségével hozzuk létre
+            // Megadjuk, hogy a JDBC milyen driveren keresztul milyen fájlt keressen
+            conn = DriverManager.getConnection("jdbc:sqlite:" + DATABASE_FILE);
+
+            // A kapcsolat (conn) objektumtól kérünk egy egyszerû (nem
+            // paraméterezhetõ) utasítást
+            st = conn.createStatement();
+
+            // Az utasítás objektumon keresztül indítunk egy query-t
+            // Az eredményeket egy ResultSet objektumban kapjuk vissza
+            ResultSet rs = st.executeQuery(SQL_SELECT_ALL_CDS);
+
+            cds = getCdsFromResultSet(rs);
+        } catch (SQLException e) {
+            System.out.println("Failed to execute listing customers.");
+            e.printStackTrace();
+        } finally {
+            try {
+                if (st != null) {
+                    st.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Failed to close statement when listing customers.");
+                e.printStackTrace();
+            }
+
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Failed to close connection when listing customers.");
+                e.printStackTrace();
+            }
+        }
+
+        return cds;
+    }
+    
+    /**
+     * Segédfüggvény mely egy {@link ResultSet}-bõl {@link Cd} listát készít.
+     *
+     * @param resultSet A {@link ResultSet} melybõl a {@link Cd} listát kinyerjük.
+     * @return A {@link Cd}-eket tartalmazó lista.
+     * @throws SQLException A seggédfüggvényben keletkezõ kivételt tovább dobjuk.
+     */
+    private List<Cd> getCdsFromResultSet(ResultSet resultSet) throws SQLException {
+        List<Cd> rvCdsList = new ArrayList<Cd>();
+
+        // Bejárjuk a ResultSet-et (ami a vásárlókat tartalmazza)
+        while (resultSet.next()) {
+            // Új vásárlót hozunk létre
+            Cd cd = new Cd();
+
+            // A vásárló id-jét a ResultSet aktuális sorából olvassuk (id column)
+            cd.setId(resultSet.getInt("id"));
+
+            // És így tovább...
+            cd.setAuthor(resultSet.getString("author"));
+            cd.setTitle(resultSet.getString("title"));
+            cd.setPrice(resultSet.getInt("price"));
+            cd.setYear(resultSet.getInt("year"));
+            cd.setHit(resultSet.getInt("hit") == 1);
+            cd.setSelection(resultSet.getInt("selection") == 1);
+
+            rvCdsList.add(cd);
+        }
+
+        return rvCdsList;
     }
 
 }

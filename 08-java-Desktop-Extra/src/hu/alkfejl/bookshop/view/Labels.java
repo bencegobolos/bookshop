@@ -79,4 +79,13 @@ public class Labels {
             "Válassz ki könyvet és vásárlót!";
     public final static String purchase_failed =
             "Nem sikerült rögzíteni a vásárlást!";
+    
+    // CD labels
+    public final static String cd = "CD";
+    public final static String buy_cd = "Buy CD";
+    public final static String list_cds = "List CDs";
+    public final static String hit = "Hit";
+    public final static String selection = "Selection";
+    public final static String cd_title_is_required = "CD title is required!";
+    public final static String cd_fail = "Title and author must be unique!";
 }

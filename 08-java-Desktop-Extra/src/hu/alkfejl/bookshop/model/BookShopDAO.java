@@ -1,6 +1,7 @@
 package hu.alkfejl.bookshop.model;
 
 import hu.alkfejl.bookshop.model.bean.Book;
+import hu.alkfejl.bookshop.model.bean.Cd;
 import hu.alkfejl.bookshop.model.bean.Customer;
 import hu.alkfejl.bookshop.model.bean.Purchase;
 
@@ -55,4 +56,19 @@ public interface BookShopDAO {
      * @return A tárolt {@link Purchase}-ek listája.
      */
     public List<Purchase> getPurchases();
+    
+    /**
+     * Hozzáad egy {@link Book}-ot az adattárhoz.
+     *
+     * @param book A tárolandó {@link Book}.
+     * @return Igaz, ha sikeresen tárolva, hamis, egyébként.
+     */
+    public boolean addCd(Cd cd);
+
+    /**
+     * Visszaadja a tárolt {@link Cd} példányokat.
+     *
+     * @return A tárolt {@link Cd}-k listája.
+     */
+    public List<Cd> getCds();
 }

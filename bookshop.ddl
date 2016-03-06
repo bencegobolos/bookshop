@@ -34,3 +34,14 @@ create table SoldBookInstances
   FOREIGN KEY (id_customer) REFERENCES Customer(id),
   UNIQUE (id_book, id_customer)
 );
+
+create table Cd
+(
+  id integer PRIMARY KEY AUTOINCREMENT,
+  author text NOT NULL,
+  title text NOT NULL,
+  year integer NOT NULL,
+  price integer NOT NULL,
+  hit integer NOT NULL,
+  selection integer NOT NULL
+);
