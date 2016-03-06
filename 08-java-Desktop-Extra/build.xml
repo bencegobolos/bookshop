@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+
+<project name="08-java-Desktop-Extra" default="dist" basedir=".">
+  <description>Alkalmazasfejlesztes "ant" példa fájl</description>
+  
+  <!-- Globális jellemzők, pl. könyvtárnevek -->
+  <property name="src" value="src"/>
+  <property name="etc" value="etc"/>
+  <property name="script" value="script"/>
+  <property name="build" value="build"/>
+  <property name="dist"  value="dist"/>
+  <property name="kulso" value="../../kulso"/>
+  
+
+  <!-- Összetett feladatok definiálása pl. init, compile, dist, clean -->
+  <target name="init" description="Projekt inicializálás">    
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init" description="Java forráskód fordítás ${src}-ből ${build}-be">    
+    <javac srcdir="${src}" destdir="${build}" classpath="${kulso}/java/sqlitejdbc-v054.jar"/>
+  </target>
+
+  <target name="dist" depends="compile" description="Disztribúció (terjeszthető változat) készítés a ${dist} könyvtárba" >
+    <copy todir="${dist}">
+       <fileset dir="${script}"/>
+    </copy>
+    <jar jarfile="${dist}/projekt.jar" basedir="${build}" manifest="${etc}/Manifest"/>
+  </target>
+</project>

@@ -1,0 +1,1 @@
+@java -cp projekt.jar;%KULSO%\java\sqlitejdbc-v054.jar hu.alkfejl.bookshop.Main
